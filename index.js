@@ -188,9 +188,18 @@ async function migrateBucket(bucket) {
   console.log(`Finished bucket ${bucket}`);
 }
 
-async function validateConnection(client, name) {
+async function validateConnection(client, name, endpoint) {
   try {
-    await client.send(new ListBucketsCommand({}));
+    console.log(`  Connecting to ${name}: ${endpoint}`);
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+    await client.send(new ListBucketsCommand({}), {
+      abortSignal: controller.signal,
+    });
+
+    clearTimeout(timeoutId);
     console.log(`✓ ${name} connection OK`);
     return true;
   } catch (error) {
@@ -202,8 +211,11 @@ async function validateConnection(client, name) {
 async function validateConnections() {
   console.log("Validating connections...\n");
 
-  const oldOk = await validateConnection(OLD, "OLD MinIO");
-  const newOk = await validateConnection(NEW, "NEW MinIO");
+  const oldEndpoint = buildEndpoint("OLD");
+  const newEndpoint = buildEndpoint("NEW");
+
+  const oldOk = await validateConnection(OLD, "OLD MinIO", oldEndpoint);
+  const newOk = await validateConnection(NEW, "NEW MinIO", newEndpoint);
 
   if (!oldOk || !newOk) {
     console.error("\n✗ Connection validation failed. Aborting.");
