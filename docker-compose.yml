@@ -1,0 +1,7 @@
+version: "3.8"
+
+services:
+  migrate:
+    build: .
+    container_name: minio-migrate
+    env_file: .env
