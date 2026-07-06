@@ -14,6 +14,7 @@ const {
 } = require("@aws-sdk/client-s3");
 
 const { Upload } = require("@aws-sdk/lib-storage");
+const { NodeHttpHandler } = require("@smithy/node-http-handler");
 
 function buildConfig(prefix) {
   const endpoint = buildEndpoint(prefix);
@@ -34,6 +35,11 @@ function buildConfig(prefix) {
       accessKeyId,
       secretAccessKey,
     },
+    maxAttempts: 3,
+    requestHandler: new NodeHttpHandler({
+      connectionTimeout: 10000,
+      requestTimeout: 30000,
+    }),
   };
 }
 
