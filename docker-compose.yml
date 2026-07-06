@@ -5,6 +5,9 @@ services:
     build: .
     container_name: minio-migrate
     env_file: .env
+    # Share host network so container resolves local hostnames (e.g. storagevds)
+    # same as your browser does. Remove if both endpoints use public DNS/IPs.
+    network_mode: host
 
 # For local testing with MinIO instances, use minio/minio:RELEASE.2025-02-18T16-25-55Z
 # Example service definition (uncomment to test locally):
