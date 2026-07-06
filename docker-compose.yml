@@ -5,3 +5,18 @@ services:
     build: .
     container_name: minio-migrate
     env_file: .env
+
+# For local testing with MinIO instances, use minio/minio:RELEASE.2025-02-18T16-25-55Z
+# Example service definition (uncomment to test locally):
+#  old-minio:
+#    image: minio/minio:RELEASE.2025-02-18T16-25-55Z
+#    container_name: old-minio
+#    ports:
+#      - "9000:9000"
+#      - "9001:9001"
+#    environment:
+#      MINIO_ROOT_USER: minioadmin
+#      MINIO_ROOT_PASSWORD: minioadmin
+#    command: server /data --console-address ":9001"
+#    volumes:
+#      - old-minio-data:/data

@@ -14,6 +14,12 @@ cp .env.example .env
 docker-compose up
 ```
 
+The script will:
+1. Validate both MinIO connections
+2. List all buckets from source
+3. Copy each bucket and its objects (with metadata & tags)
+4. Exit on first connection failure
+
 ## Using with Existing MinIO Instances
 
 1. Copy `.env.example` to `.env`:
@@ -33,6 +39,19 @@ Or run locally with Node.js:
 ```bash
 npm install
 npm start
+```
+
+## Testing Locally
+
+To test with local MinIO instances, add them to `docker-compose.yml` using:
+```
+minio/minio:RELEASE.2025-02-18T16-25-55Z
+```
+
+Update `.env` to point to local instances:
+```env
+OLD_ENDPOINT=http://old-minio:9000
+NEW_ENDPOINT=http://new-minio:9000
 ```
 
 ## Environment Variables

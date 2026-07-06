@@ -188,7 +188,34 @@ async function migrateBucket(bucket) {
   console.log(`Finished bucket ${bucket}`);
 }
 
+async function validateConnection(client, name) {
+  try {
+    await client.send(new ListBucketsCommand({}));
+    console.log(`✓ ${name} connection OK`);
+    return true;
+  } catch (error) {
+    console.error(`✗ ${name} connection failed: ${error.message}`);
+    return false;
+  }
+}
+
+async function validateConnections() {
+  console.log("Validating connections...\n");
+
+  const oldOk = await validateConnection(OLD, "OLD MinIO");
+  const newOk = await validateConnection(NEW, "NEW MinIO");
+
+  if (!oldOk || !newOk) {
+    console.error("\n✗ Connection validation failed. Aborting.");
+    process.exit(1);
+  }
+
+  console.log("\n✓ All connections validated. Starting migration...\n");
+}
+
 async function migrateAll() {
+  await validateConnections();
+
   const buckets = await OLD.send(new ListBucketsCommand({}));
 
   for (const bucket of buckets.Buckets) {
