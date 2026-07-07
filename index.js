@@ -111,18 +111,39 @@ async function ensureBucket(bucket) {
   }
 }
 
-async function migrateObject(bucket, key) {
-  console.log(`Copying ${bucket}/${key}`);
+async function objectExistsInNew(bucket, key, sourceSize) {
+  try {
+    const head = await NEW.send(
+      new HeadObjectCommand({
+        Bucket: bucket,
+        Key: key,
+      })
+    );
 
-  const object = await OLD.send(
-    new GetObjectCommand({
+    // Treat as already migrated only if size matches source
+    return head.ContentLength === sourceSize;
+  } catch {
+    return false;
+  }
+}
+
+async function migrateObject(bucket, key) {
+  const head = await OLD.send(
+    new HeadObjectCommand({
       Bucket: bucket,
       Key: key,
     })
   );
 
-  const head = await OLD.send(
-    new HeadObjectCommand({
+  if (await objectExistsInNew(bucket, key, head.ContentLength)) {
+    console.log(`Skipping ${bucket}/${key} (already exists)`);
+    return;
+  }
+
+  console.log(`Copying ${bucket}/${key}`);
+
+  const object = await OLD.send(
+    new GetObjectCommand({
       Bucket: bucket,
       Key: key,
     })
